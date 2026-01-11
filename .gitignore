@@ -1,0 +1,10 @@
+# Python
+venv/
+.venv/
+__pycache__/
+
+# FastF1 cache
+cache/
+
+# OS
+.DS_Store
