@@ -1,38 +1,37 @@
 import fastf1
 import pandas as pd
 
-# 1. SETUP
-fastf1.Cache.enable_cache('cache') 
-session = fastf1.get_session(2023, 'Bahrain', 'R')
-session.load()
-laps = session.laps
+# 1. SETUP CACHE
+fastf1.Cache.enable_cache('cache')
 
-# 2. FILTERING (Block 2 logic)
-# Pick only Green Flag laps (TrackStatus = '1')
-# Also remove "In laps" and "Out laps" which are inherently slow
-race_laps = laps.pick_quicklaps() # FastF1 helper that handles in/out laps + safety cars automatically
-race_laps = race_laps.reset_index(drop=True)
+def get_race_data(year, gp_location):
+    print(f"Loading {year} {gp_location} Grand Prix...")
+    session = fastf1.get_session(year, gp_location, 'R')
+    session.load()
+    laps = session.laps
 
-# 3. TRANSFORMATION (Block 3 logic)
-race_laps['LapTimeSeconds'] = race_laps['LapTime'].dt.total_seconds()
+    # 2. FILTERING
+    # Pick only Green Flag laps (TrackStatus = '1') & remove in/out laps
+    race_laps = laps.pick_quicklaps().reset_index(drop=True)
 
-# Select the features we need for ML
-features = [
-    'Driver', 
-    'LapNumber', 
-    'LapTimeSeconds', 
-    'Compound', 
-    'TyreLife', 
-    'Team'
-]
+    # 3. TRANSFORMATION
+    race_laps['LapTimeSeconds'] = race_laps['LapTime'].dt.total_seconds()
 
-final_df = race_laps[features]
+    # Select features
+    features = ['Driver', 'LapNumber', 'LapTimeSeconds', 'Compound', 'TyreLife', 'Team']
+    final_df = race_laps[features].dropna()
+    
+    # 4. ENCODING (One-Hot Encoding for Compounds)
+    df_encoded = pd.get_dummies(final_df, columns=['Compound'])
+    
+    return df_encoded
 
-# Remove any rows that might still have NaNs (empty values)
-final_df = final_df.dropna()
 
-print(f"Data ready! Shape: {final_df.shape}")
-print(final_df.head())
-
-# Save for the next step (ML)
-final_df.to_csv("bahrain_2023_clean.csv", index=False)
+if __name__ == "__main__":
+    data = get_race_data(2023, 'Bahrain')
+    print(f"Data Shape: {data.shape}")
+    print(data.head())
+    
+    # Save to CSV so we don't have to download it every time we test the model
+    data.to_csv("training_data.csv", index=False)
+    print("Saved to training_data.csv")
