@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
+import joblib
 
 df = pd.read_csv('training_data.csv')
 y = df['LapTimeSeconds']
@@ -25,3 +26,8 @@ print(f"Base Lap Time (Intercept): {model.intercept_:.2f} s")
 # Show the 'weight' the model assigned to each feature
 coefficients = pd.DataFrame({'Feature': X.columns, 'Weight': model.coef_})
 print(coefficients)
+
+
+model_filename = "f1_lap_time_model.pkl"
+joblib.dump({'model': model, 'columns': list(X.columns)}, model_filename)
+print(f"Model saved to {model_filename}")
