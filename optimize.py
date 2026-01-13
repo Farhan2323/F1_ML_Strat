@@ -7,9 +7,6 @@ results = []
 best_time = float('inf')  # Start with infinity so the first result is always lower
 best_lap = -1
 
-print("--- Optimizing Pit Stop Strategy (Soft -> Hard) ---")
-
-# We test pitting anywhere from Lap 10 to Lap 50
 possible_pit_laps = range(10, 51)
 
 for pit_lap in possible_pit_laps:
@@ -41,4 +38,3 @@ plt.xlabel('Pit Stop Lap')
 plt.ylabel('Total Race Time (s)')
 plt.grid(True)
 plt.savefig('strategy_optimization.png')
-print("Saved optimization plot to strategy_optimization.png")
